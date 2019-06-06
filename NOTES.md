@@ -5,6 +5,7 @@ Simple email sender with primary and secondary email client. Using Koa for routi
 ## Potholes
 
 - Joi didn't work with current node version, had to switch to 12.4 - took a while to figure out the error
+- Wife coming home from work is very disruptive :)
 
 ## Endpoints
 
@@ -49,8 +50,8 @@ class Attempt {
 ```
 
 ```
-class EmailSenderClient {
-  send(message, attempts = []) {
+class MessageSenderClient {
+  send(message) {
     return new Attempt(message);
   }
 }

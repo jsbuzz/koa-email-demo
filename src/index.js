@@ -37,7 +37,13 @@ router.post('/send', async ctx => {
   const message = schemaResult.value;
 
   try {
-    await sendMessage(message);
+    const attempt = await sendMessage(message);
+
+    if (!attempt.success) {
+      ctx.body = attempt;
+      ctx.status = 500;
+      return;
+    }
   } catch (error) {
     ctx.body = { error };
     ctx.status = 500;

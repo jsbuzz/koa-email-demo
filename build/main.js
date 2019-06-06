@@ -88,6 +88,62 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/domain.js":
+/*!***********************!*\
+  !*** ./src/domain.js ***!
+  \***********************/
+/*! exports provided: Attempt, MessageSenderClient */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Attempt", function() { return Attempt; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MessageSenderClient", function() { return MessageSenderClient; });
+class Attempt {
+  constructor(message, client, error) {
+    this.message = message;
+    this.client = client;
+
+    if (error) {
+      this.error = error;
+      this.success = false;
+    } else {
+      this.success = true;
+    }
+  }
+
+}
+class MessageSenderClient {
+  send(message) {
+    return new Attempt(message);
+  }
+
+}
+
+/***/ }),
+
+/***/ "./src/emailClients/consoleClient.js":
+/*!*******************************************!*\
+  !*** ./src/emailClients/consoleClient.js ***!
+  \*******************************************/
+/*! exports provided: ConsoleClient */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ConsoleClient", function() { return ConsoleClient; });
+/* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain */ "./src/domain.js");
+
+class ConsoleClient extends _domain__WEBPACK_IMPORTED_MODULE_0__["MessageSenderClient"] {
+  async send(message) {
+    console.log('ConsoleClient.send', message);
+    return new _domain__WEBPACK_IMPORTED_MODULE_0__["Attempt"](message, ConsoleClient);
+  }
+
+}
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -144,7 +200,13 @@ router.post('/send', async ctx => {
   const message = schemaResult.value;
 
   try {
-    await Object(_sendMessage__WEBPACK_IMPORTED_MODULE_4__["sendMessage"])(message);
+    const attempt = await Object(_sendMessage__WEBPACK_IMPORTED_MODULE_4__["sendMessage"])(message);
+
+    if (!attempt.success) {
+      ctx.body = attempt;
+      ctx.status = 500;
+      return;
+    }
   } catch (error) {
     ctx.body = {
       error
@@ -166,15 +228,37 @@ app.listen(3000);
 /*!****************************!*\
   !*** ./src/sendMessage.js ***!
   \****************************/
-/*! exports provided: sendMessage */
+/*! exports provided: sendMessage, makeAttempt */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sendMessage", function() { return sendMessage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "makeAttempt", function() { return makeAttempt; });
+/* harmony import */ var _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./emailClients/consoleClient */ "./src/emailClients/consoleClient.js");
+/* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./domain */ "./src/domain.js");
+
+
+const consoleClient = new _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_0__["ConsoleClient"]();
+const clients = [consoleClient];
+const MaxRetries = 3;
 async function sendMessage(message) {
-  console.log('sent', message);
-  return true;
+  const attempts = [];
+
+  while (attempts.length < MaxRetries) {
+    const attempt = await makeAttempt(message, attempts);
+
+    if (attempt.success) {
+      return attempt;
+    }
+
+    attempts.push(attempt);
+  }
+
+  return new _domain__WEBPACK_IMPORTED_MODULE_1__["Attempt"](message, null, 'Max retries exceeded');
+}
+async function makeAttempt(message, attempts) {
+  return await clients[0].send(message); // return new Attempt(message, null, 'Some error');
 }
 
 /***/ }),
