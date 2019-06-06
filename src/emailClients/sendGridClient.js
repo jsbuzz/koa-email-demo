@@ -2,7 +2,7 @@ import SendGrid from '@sendgrid/mail';
 
 import { MessageSenderClient } from '../domain';
 
-SendGrid.setApiKey('tt' + process.env.SENDGRID_API_KEY);
+SendGrid.setApiKey(process.env.SENDGRID_API_KEY);
 
 export class SendGridClient extends MessageSenderClient {
   send(message) {

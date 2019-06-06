@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha 'src/**/*.spec.js'",
+    "test": "mocha -r @babel/polyfill -r @babel/register 'src/**/*.spec.js'",
     "start": "node ./build/main.js",
     "dev": "backpack dev",
     "build": "backpack build",
@@ -13,6 +13,9 @@
   "author": "Matyas",
   "license": "ISC",
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/register": "^7.4.4",
     "@sendgrid/mail": "^6.4.0",
     "backpack-core": "^0.8.3",
     "joi": "^14.3.1",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^6.1.4"
+    "mocha": "3.5.3",
+    "sinon": "^7.3.2"
   }
 }
