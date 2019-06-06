@@ -3,6 +3,8 @@ import KoaBody from 'koa-body';
 import Router from 'koa-router';
 import Joi from 'joi';
 
+import { sendMessage } from './sendMessage';
+
 const app = new Koa();
 const router = new Router();
 
@@ -18,7 +20,7 @@ router.get('/health', ctx => {
   ctx.status = 200;
 });
 
-router.post('/send', ctx => {
+router.post('/send', async ctx => {
   const schemaResult = messageSchema.validate(ctx.request.body, {
     stripUnknown: true
   });
@@ -33,6 +35,14 @@ router.post('/send', ctx => {
   }
 
   const message = schemaResult.value;
+
+  try {
+    await sendMessage(message);
+  } catch (error) {
+    ctx.body = { error };
+    ctx.status = 500;
+    return;
+  }
 
   ctx.body = message;
   ctx.status = 200;

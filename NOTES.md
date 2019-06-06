@@ -2,6 +2,10 @@
 
 Simple email sender with primary and secondary email client. Using Koa for routing and as http server and backpack for building.
 
+## Potholes
+
+- Joi didn't work with current node version, had to switch to 12.4 - took a while to figure out the error
+
 ## Endpoints
 
 **GET /health**

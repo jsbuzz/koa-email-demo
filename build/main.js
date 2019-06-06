@@ -105,6 +105,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(koa_router__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! joi */ "joi");
 /* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(joi__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _sendMessage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./sendMessage */ "./src/sendMessage.js");
+
 
 
 
@@ -121,7 +123,7 @@ router.get('/health', ctx => {
   ctx.body = 'OK';
   ctx.status = 200;
 });
-router.post('/send', ctx => {
+router.post('/send', async ctx => {
   const schemaResult = messageSchema.validate(ctx.request.body, {
     stripUnknown: true
   });
@@ -140,12 +142,40 @@ router.post('/send', ctx => {
   }
 
   const message = schemaResult.value;
+
+  try {
+    await Object(_sendMessage__WEBPACK_IMPORTED_MODULE_4__["sendMessage"])(message);
+  } catch (error) {
+    ctx.body = {
+      error
+    };
+    ctx.status = 500;
+    return;
+  }
+
   ctx.body = message;
   ctx.status = 200;
 });
 app.use(koa_body__WEBPACK_IMPORTED_MODULE_1___default()());
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(3000);
+
+/***/ }),
+
+/***/ "./src/sendMessage.js":
+/*!****************************!*\
+  !*** ./src/sendMessage.js ***!
+  \****************************/
+/*! exports provided: sendMessage */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sendMessage", function() { return sendMessage; });
+async function sendMessage(message) {
+  console.log('sent', message);
+  return true;
+}
 
 /***/ }),
 
