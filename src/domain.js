@@ -14,6 +14,6 @@ export class Attempt {
 
 export class MessageSenderClient {
   send(message) {
-    return new Attempt(message);
+    throw new Error('MessageSenderClient.send');
   }
 }

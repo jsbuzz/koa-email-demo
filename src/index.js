@@ -44,14 +44,14 @@ router.post('/send', async ctx => {
       ctx.status = 500;
       return;
     }
+
+    ctx.body = attempt;
+    ctx.status = 200;
   } catch (error) {
-    ctx.body = { error };
+    ctx.body = { error: error.message };
     ctx.status = 500;
     return;
   }
-
-  ctx.body = message;
-  ctx.status = 200;
 });
 
 app.use(KoaBody());

@@ -1,9 +1,7 @@
-import { MessageSenderClient, Attempt } from '../domain';
+import { MessageSenderClient } from '../domain';
 
 export class ConsoleClient extends MessageSenderClient {
-  async send(message) {
+  send(message) {
     console.log('ConsoleClient.send', message);
-
-    return new Attempt(message, ConsoleClient);
   }
 }

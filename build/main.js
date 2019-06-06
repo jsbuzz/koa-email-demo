@@ -115,7 +115,7 @@ class Attempt {
 }
 class MessageSenderClient {
   send(message) {
-    return new Attempt(message);
+    throw new Error('MessageSenderClient.send');
   }
 
 }
@@ -135,9 +135,45 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../domain */ "./src/domain.js");
 
 class ConsoleClient extends _domain__WEBPACK_IMPORTED_MODULE_0__["MessageSenderClient"] {
-  async send(message) {
+  send(message) {
     console.log('ConsoleClient.send', message);
-    return new _domain__WEBPACK_IMPORTED_MODULE_0__["Attempt"](message, ConsoleClient);
+  }
+
+}
+
+/***/ }),
+
+/***/ "./src/emailClients/sendGridClient.js":
+/*!********************************************!*\
+  !*** ./src/emailClients/sendGridClient.js ***!
+  \********************************************/
+/*! exports provided: SendGridClient */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SendGridClient", function() { return SendGridClient; });
+/* harmony import */ var _sendgrid_mail__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @sendgrid/mail */ "@sendgrid/mail");
+/* harmony import */ var _sendgrid_mail__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_sendgrid_mail__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../domain */ "./src/domain.js");
+
+
+_sendgrid_mail__WEBPACK_IMPORTED_MODULE_0___default.a.setApiKey('tt' + process.env.SENDGRID_API_KEY);
+class SendGridClient extends _domain__WEBPACK_IMPORTED_MODULE_1__["MessageSenderClient"] {
+  send(message) {
+    const {
+      sender,
+      recipient,
+      subject,
+      body
+    } = message;
+    return _sendgrid_mail__WEBPACK_IMPORTED_MODULE_0___default.a.send({
+      subject,
+      to: recipient,
+      from: sender,
+      text: body,
+      html: body
+    });
   }
 
 }
@@ -207,16 +243,16 @@ router.post('/send', async ctx => {
       ctx.status = 500;
       return;
     }
+
+    ctx.body = attempt;
+    ctx.status = 200;
   } catch (error) {
     ctx.body = {
-      error
+      error: error.message
     };
     ctx.status = 500;
     return;
   }
-
-  ctx.body = message;
-  ctx.status = 200;
 });
 app.use(koa_body__WEBPACK_IMPORTED_MODULE_1___default()());
 app.use(router.routes()).use(router.allowedMethods());
@@ -235,18 +271,28 @@ app.listen(3000);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sendMessage", function() { return sendMessage; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "makeAttempt", function() { return makeAttempt; });
-/* harmony import */ var _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./emailClients/consoleClient */ "./src/emailClients/consoleClient.js");
-/* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./domain */ "./src/domain.js");
+/* harmony import */ var _domain__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./domain */ "./src/domain.js");
+/* harmony import */ var _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./emailClients/consoleClient */ "./src/emailClients/consoleClient.js");
+/* harmony import */ var _emailClients_sendGridClient__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./emailClients/sendGridClient */ "./src/emailClients/sendGridClient.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
-const consoleClient = new _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_0__["ConsoleClient"]();
-const clients = [consoleClient];
+
+
+const consoleClient = new _emailClients_consoleClient__WEBPACK_IMPORTED_MODULE_1__["ConsoleClient"]();
+const sendGridClient = new _emailClients_sendGridClient__WEBPACK_IMPORTED_MODULE_2__["SendGridClient"]();
+const clients = [sendGridClient, consoleClient];
 const MaxRetries = 3;
+const DefaultSender = process.env.DEFAULT_SENDER || 'matyas.buczko@gmail.com';
 async function sendMessage(message) {
   const attempts = [];
 
   while (attempts.length < MaxRetries) {
-    const attempt = await makeAttempt(message, attempts);
+    const attempt = await makeAttempt(_objectSpread({}, message, {
+      sender: message.sender || DefaultSender
+    }), attempts);
 
     if (attempt.success) {
       return attempt;
@@ -255,10 +301,23 @@ async function sendMessage(message) {
     attempts.push(attempt);
   }
 
-  return new _domain__WEBPACK_IMPORTED_MODULE_1__["Attempt"](message, null, 'Max retries exceeded');
+  return new _domain__WEBPACK_IMPORTED_MODULE_0__["Attempt"](message, null, 'Max retries exceeded');
 }
 async function makeAttempt(message, attempts) {
-  return await clients[0].send(message); // return new Attempt(message, null, 'Some error');
+  let nextTry = 0;
+
+  if (attempts.length) {
+    nextTry = attempts[attempts.length - 1].client === _emailClients_sendGridClient__WEBPACK_IMPORTED_MODULE_2__["SendGridClient"].name ? 1 : 0;
+  }
+
+  const client = clients[nextTry];
+
+  try {
+    await clients[nextTry].send(message);
+    return new _domain__WEBPACK_IMPORTED_MODULE_0__["Attempt"](message, client.constructor.name);
+  } catch (error) {
+    return new _domain__WEBPACK_IMPORTED_MODULE_0__["Attempt"](message, client.constructor.name, error);
+  }
 }
 
 /***/ }),
@@ -272,6 +331,17 @@ async function makeAttempt(message, attempts) {
 
 module.exports = __webpack_require__(/*! /Users/matyasbuczko/github/koa-email-demo/src/index.js */"./src/index.js");
 
+
+/***/ }),
+
+/***/ "@sendgrid/mail":
+/*!*********************************!*\
+  !*** external "@sendgrid/mail" ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@sendgrid/mail");
 
 /***/ }),
 
