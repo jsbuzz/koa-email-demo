@@ -99,20 +99,51 @@ module.exports =
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! koa */ "koa");
 /* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(koa__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! koa-router */ "koa-router");
-/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(koa_router__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! koa-body */ "koa-body");
+/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(koa_body__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! koa-router */ "koa-router");
+/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(koa_router__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! joi */ "joi");
+/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(joi__WEBPACK_IMPORTED_MODULE_3__);
+
+
 
 
 const app = new koa__WEBPACK_IMPORTED_MODULE_0___default.a();
-const router = new koa_router__WEBPACK_IMPORTED_MODULE_1___default.a();
+const router = new koa_router__WEBPACK_IMPORTED_MODULE_2___default.a();
+const messageSchema = joi__WEBPACK_IMPORTED_MODULE_3___default.a.object().keys({
+  sender: joi__WEBPACK_IMPORTED_MODULE_3___default.a.string(),
+  recipient: joi__WEBPACK_IMPORTED_MODULE_3___default.a.string().required(),
+  subject: joi__WEBPACK_IMPORTED_MODULE_3___default.a.string().required(),
+  body: joi__WEBPACK_IMPORTED_MODULE_3___default.a.string().required()
+});
 router.get('/health', ctx => {
   ctx.body = 'OK';
   ctx.status = 200;
 });
 router.post('/send', ctx => {
-  ctx.body = 'OK';
+  const schemaResult = messageSchema.validate(ctx.request.body, {
+    stripUnknown: true
+  });
+
+  if (schemaResult.error) {
+    const {
+      details
+    } = schemaResult.error;
+    ctx.body = {
+      error: details.map(({
+        message
+      }) => message)
+    };
+    ctx.status = 400;
+    return;
+  }
+
+  const message = schemaResult.value;
+  ctx.body = message;
   ctx.status = 200;
 });
+app.use(koa_body__WEBPACK_IMPORTED_MODULE_1___default()());
 app.use(router.routes()).use(router.allowedMethods());
 app.listen(3000);
 
@@ -130,6 +161,17 @@ module.exports = __webpack_require__(/*! /Users/matyasbuczko/github/koa-email-de
 
 /***/ }),
 
+/***/ "joi":
+/*!**********************!*\
+  !*** external "joi" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("joi");
+
+/***/ }),
+
 /***/ "koa":
 /*!**********************!*\
   !*** external "koa" ***!
@@ -138,6 +180,17 @@ module.exports = __webpack_require__(/*! /Users/matyasbuczko/github/koa-email-de
 /***/ (function(module, exports) {
 
 module.exports = require("koa");
+
+/***/ }),
+
+/***/ "koa-body":
+/*!***************************!*\
+  !*** external "koa-body" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("koa-body");
 
 /***/ }),
 

@@ -14,7 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "backpack-core": "^0.8.3",
+    "joi": "^14.3.1",
     "koa": "^2.7.0",
+    "koa-body": "^4.1.0",
     "koa-router": "^7.4.0"
   },
   "devDependencies": {
