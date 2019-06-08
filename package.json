@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r @babel/polyfill -r @babel/register 'src/**/*.spec.js'",
+    "test": "mocha -r @babel/register 'src/**/*.spec.js'",
     "start": "node ./build/main.js",
     "dev": "backpack dev",
     "build": "backpack build",
-    "postinstall": "backpack build"
+    "postinstall": "backpack build",
+    "eslint": "./node_modules/.bin/eslint src/*"
   },
   "author": "Matyas",
   "license": "ISC",
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.4.4",
-    "@babel/polyfill": "^7.4.4",
     "@babel/register": "^7.4.4",
     "@sendgrid/mail": "^6.4.0",
     "backpack-core": "^0.8.3",
@@ -24,8 +24,18 @@
     "koa-router": "^7.4.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.1",
     "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
     "mocha": "3.5.3",
+    "prettier": "^1.18.0",
     "sinon": "^7.3.2"
   }
 }
