@@ -16,6 +16,8 @@ const messageSchema = Joi.object().keys({
 });
 
 router.get('/health', ctx => {
+  // if there were any databases or resources we should check them here
+
   ctx.body = 'OK';
   ctx.status = 200;
 });
@@ -50,7 +52,6 @@ router.post('/send', async ctx => {
   } catch (error) {
     ctx.body = { error: error.message };
     ctx.status = 500;
-    return;
   }
 });
 

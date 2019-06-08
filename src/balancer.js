@@ -5,18 +5,19 @@ import { SendGridClient } from './emailClients/sendGridClient';
 const consoleClient = new ConsoleClient();
 const sendGridClient = new SendGridClient();
 
-const clients = [sendGridClient, consoleClient];
+export const clients = [sendGridClient, consoleClient];
 
 export async function makeAttempt(message, attempts) {
-  let nextTry = 0;
+  let client = clients[0];
+
   if (attempts.length) {
-    nextTry =
-      attempts[attempts.length - 1].client === SendGridClient.name ? 1 : 0;
+    const lastClient = attempts[attempts.length - 1].client;
+
+    client = clients.find(c => c.constructor.name !== lastClient);
   }
-  const client = clients[nextTry];
 
   try {
-    await clients[nextTry].send(message);
+    await client.send(message);
 
     return new Attempt(message, client.constructor.name);
   } catch (error) {

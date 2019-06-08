@@ -1,19 +1,19 @@
 import { Attempt } from './domain';
 import { makeAttempt } from './balancer';
 
-const MaxRetries = 3;
-export const DefaultSender =
-  process.env.DEFAULT_SENDER || 'matyas.buczko@gmail.com';
+export const MAX_RETRIES = 3;
+export const DEFAULT_SENDER =
+  process.env.DEFAULT_SENDER || 'matyas@testing.com';
 
 export async function sendMessage(message) {
   const attempts = [];
-  while (attempts.length < MaxRetries) {
+  while (attempts.length < MAX_RETRIES) {
     const attempt = await makeAttempt(
       {
         ...message,
-        sender: message.sender || DefaultSender
+        sender: message.sender || DEFAULT_SENDER,
       },
-      attempts
+      attempts,
     );
 
     if (attempt.success) {
