@@ -1356,42 +1356,37 @@ function (_MessageSenderClient) {
 
 /***/ }),
 
-/***/ "./src/index.js":
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
-/*! no exports provided */
+/***/ "./src/endpoints.js":
+/*!**************************!*\
+  !*** ./src/endpoints.js ***!
+  \**************************/
+/*! exports provided: router, messageSchema */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "router", function() { return router; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "messageSchema", function() { return messageSchema; });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! koa */ "koa");
-/* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(koa__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! koa-body */ "koa-body");
-/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(koa_body__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! koa-router */ "koa-router");
-/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(koa_router__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! joi */ "joi");
-/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(joi__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _sendMessage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./sendMessage */ "./src/sendMessage.js");
+/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! joi */ "joi");
+/* harmony import */ var joi__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(joi__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! koa-router */ "koa-router");
+/* harmony import */ var koa_router__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(koa_router__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _sendMessage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./sendMessage */ "./src/sendMessage.js");
 
 
 
 
 
-
-
-var app = new koa__WEBPACK_IMPORTED_MODULE_2___default.a();
-var router = new koa_router__WEBPACK_IMPORTED_MODULE_4___default.a();
-var messageSchema = joi__WEBPACK_IMPORTED_MODULE_5___default.a.object().keys({
-  sender: joi__WEBPACK_IMPORTED_MODULE_5___default.a.string(),
-  recipient: joi__WEBPACK_IMPORTED_MODULE_5___default.a.string().required(),
-  subject: joi__WEBPACK_IMPORTED_MODULE_5___default.a.string().required(),
-  body: joi__WEBPACK_IMPORTED_MODULE_5___default.a.string().required()
+var router = new koa_router__WEBPACK_IMPORTED_MODULE_3___default.a();
+var messageSchema = joi__WEBPACK_IMPORTED_MODULE_2___default.a.object().keys({
+  sender: joi__WEBPACK_IMPORTED_MODULE_2___default.a.string().email(),
+  recipient: joi__WEBPACK_IMPORTED_MODULE_2___default.a.string().email().required(),
+  subject: joi__WEBPACK_IMPORTED_MODULE_2___default.a.string().required(),
+  body: joi__WEBPACK_IMPORTED_MODULE_2___default.a.string().required()
 });
 router.get('/health', function (ctx) {
   // if there were any databases or resources we should check them here
@@ -1432,7 +1427,7 @@ function () {
             message = schemaResult.value;
             _context.prev = 7;
             _context.next = 10;
-            return Object(_sendMessage__WEBPACK_IMPORTED_MODULE_6__["sendMessage"])(message);
+            return Object(_sendMessage__WEBPACK_IMPORTED_MODULE_4__["sendMessage"])(message);
 
           case 10:
             attempt = _context.sent;
@@ -1472,8 +1467,29 @@ function () {
     return _ref.apply(this, arguments);
   };
 }());
-app.use(koa_body__WEBPACK_IMPORTED_MODULE_3___default()());
-app.use(router.routes()).use(router.allowedMethods());
+
+/***/ }),
+
+/***/ "./src/index.js":
+/*!**********************!*\
+  !*** ./src/index.js ***!
+  \**********************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! koa */ "koa");
+/* harmony import */ var koa__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(koa__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! koa-body */ "koa-body");
+/* harmony import */ var koa_body__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(koa_body__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _endpoints__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./endpoints */ "./src/endpoints.js");
+
+
+
+var app = new koa__WEBPACK_IMPORTED_MODULE_0___default.a();
+app.use(koa_body__WEBPACK_IMPORTED_MODULE_1___default()());
+app.use(_endpoints__WEBPACK_IMPORTED_MODULE_2__["router"].routes()).use(_endpoints__WEBPACK_IMPORTED_MODULE_2__["router"].allowedMethods());
 app.listen(3000);
 
 /***/ }),
