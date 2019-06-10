@@ -17,6 +17,7 @@ Going forward I would do the following steps:
 ## Potholes
 
 - Joi didn't work with current node version, had to switch to 12.4 - took a while to figure out the error
+  -  Note: error was probably the missing babel plugin because now it runs on 8.0.0 as well
 - Wife coming home from work is very disruptive :)
 - mocha, backpack and babel are not really working well together out of the box
 
